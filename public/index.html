@@ -3,35 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChamaSmart Vault</title>
+    <title>ChamaSmart | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
-    <div class="p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-md text-center">
-        <h1 class="text-2xl font-bold mb-2">🛡️ ChamaSmart Vault</h1>
-        <p class="text-slate-400 mb-6 text-sm">Testing Phase: 2-Week Small Money Beta</p>
-        
-        <div class="bg-slate-900 p-6 rounded-xl border border-blue-500/30 mb-6">
-            <span class="text-slate-400 uppercase text-xs tracking-widest">Total Balance</span>
-            <div id="balance" class="text-5xl font-black text-blue-400 mt-2">Ksh --</div>
+<body class="bg-[#0f172a] text-white min-h-screen flex flex-col items-center p-4">
+    <div class="w-full max-w-md flex justify-between items-center mb-8 mt-4">
+        <div>
+            <h1 class="text-xl font-extrabold tracking-tight">CHAMASMART</h1>
+            <p class="text-xs text-blue-400 font-semibold uppercase tracking-widest">Live Beta v1.0</p>
         </div>
+        <div class="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center font-bold border-2 border-blue-400">
+            GS
+        </div>
+    </div>
 
-        <p id="vibe" class="text-sm italic text-slate-300">"T.E.S.S. is waking up..."</p>
+    <div class="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10">
+            <svg width="100" height="100" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        
+        <p class="text-slate-400 text-sm font-medium">Total Group Savings</p>
+        <h2 id="balance" class="text-5xl font-black mt-2 mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+            Ksh --
+        </h2>
+        
+        <div class="flex items-center gap-2 py-1 px-3 bg-emerald-500/10 border border-emerald-500/20 rounded-full w-fit">
+            <span class="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span class="text-emerald-500 text-[10px] font-bold uppercase tracking-tighter">Vault Connected</span>
+        </div>
+    </div>
 
-        <button onclick="updateBalance()" class="mt-8 bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold transition-all">
-            Refresh Vault 🔄
+    <div class="w-full max-w-md mt-6 p-4 bg-slate-800/50 rounded-2xl border border-white/5 italic text-slate-300 text-center text-sm">
+        " <span id="vibe">T.E.S.S. is checking the coins...</span> "
+    </div>
+
+    <div class="w-full max-w-md mt-8 grid grid-cols-2 gap-4">
+        <button onclick="updateBalance()" class="bg-white text-black font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-transform">
+            Refresh 🔄
+        </button>
+        <button class="bg-blue-600 font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20 active:scale-95 transition-transform">
+            Deposit +
         </button>
     </div>
 
     <script>
         async function updateBalance() {
-            const res = await fetch('/api/balance');
-            const data = await res.json();
-            document.getElementById('balance').innerText = `Ksh ${data.balance}`;
-            document.getElementById('vibe').innerText = `"${data.vibe}"`;
+            const btn = document.querySelector('button');
+            btn.innerText = "Syncing...";
+            try {
+                const res = await fetch('/api/balance');
+                const data = await res.json();
+                document.getElementById('balance').innerText = `Ksh ${data.balance || 0}`;
+                document.getElementById('vibe').innerText = data.vibe || "Everything looks good.";
+            } catch (err) {
+                document.getElementById('vibe').innerText = "Vercel function is still waking up. Give it 10 seconds.";
+            }
+            btn.innerText = "Refresh 🔄";
         }
-        // Load on start
-        updateBalance();
+        window.onload = updateBalance;
     </script>
 </body>
 </html>
