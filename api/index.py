@@ -3,8 +3,12 @@ from supabase import create_client
 
 app = FastAPI()
 
-# Your secure connection
-supabase = create_client("URL", "SERVICE_KEY")
+# Replace these with your actual credentials from Supabase
+URL = "https://eymdckclisznzixcdket.supabase.co"
+KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWRja2NsaXN6bnppeGNka2V0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY1MDY1MSwiZXhwIjoyMDkxMjI2NjUxfQ.d9cf0ypTDNVU9YASP91rqvV4mN_xZ_IvJ0qpPtWW98I"
+
+supabase = create_client(URL, KEY)
+
 
 @app.get("/api/balance")
 def get_balance():
