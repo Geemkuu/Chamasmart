@@ -2,32 +2,258 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChamaSmart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChamaSmart - Chama Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .vault-glow { box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        .pulse-soft { animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-6">
-    <div class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-2xl text-center border border-slate-700">
-        <h1 class="text-xl font-bold text-blue-400 mb-6 uppercase tracking-tighter">ChamaSmart Vault</h1>
-        <div class="py-8 bg-slate-900 rounded-2xl mb-6">
-            <p class="text-slate-400 text-xs uppercase mb-1">Total Balance</p>
-            <div id="balance" class="text-4xl font-black tracking-tight text-white">Ksh --</div>
+<body class="bg-slate-950 text-white">
+    <!-- Main Container -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 pb-20">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-black text-blue-400 mb-1 opacity-90">💰 CHAMASMART</h1>
+            <p class="text-slate-400 text-sm">Digital Ledger • Append-Only • Zero Trust</p>
         </div>
-        <button onclick="fetchBalance()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all active:scale-95">
-            Refresh Balance 🔄
-        </button>
+
+        <!-- Main Vault Card -->
+        <div class="w-full max-w-sm bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-3xl border border-blue-500/30 vault-glow">
+            
+            <!-- Balance Display -->
+            <div class="bg-slate-950 rounded-2xl p-6 mb-6 border border-slate-700">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-3">Vault Balance</p>
+                <div id="balance" class="text-5xl font-black text-blue-300 mb-2 tabular-nums">Ksh --</div>
+                <p id="transaction-count" class="text-slate-500 text-xs">Loading transactions...</p>
+            </div>
+
+            <!-- Vibe Check -->
+            <div id="vibe-check" class="bg-blue-950/40 border border-blue-500/50 rounded-xl p-4 mb-6 text-center">
+                <p class="text-sm text-blue-200 italic pulse-soft" id="vibe-text">Connecting to vault...</p>
+            </div>
+
+            <!-- Refresh Button -->
+            <button onclick="fetchBalance()" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 py-4 rounded-xl font-bold text-lg transition-all duration-200 active:scale-95 mb-4 flex items-center justify-center gap-2">
+                <span>🔄</span>
+                <span>Refresh Balance</span>
+            </button>
+
+            <!-- Deposit Button -->
+            <button onclick="openDepositModal()" class="w-full bg-green-600 hover:bg-green-500 active:bg-green-700 py-4 rounded-xl font-bold text-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">
+                <span>💳</span>
+                <span>Make Deposit</span>
+            </button>
+        </div>
+
+        <!-- Status Footer -->
+        <div class="mt-8 text-center">
+            <p id="status" class="text-slate-500 text-xs">Ready</p>
+        </div>
     </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="hidden fixed inset-0 bg-black/70 flex items-end z-50 animate-fade-in">
+        <div class="w-full bg-slate-900 rounded-t-3xl p-6 border-t border-slate-700 animate-slide-up">
+            <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <span>💳</span> Make a Deposit
+            </h2>
+
+            <!-- Form -->
+            <div class="space-y-4 mb-6">
+                <!-- Phone Input -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Phone Number *</label>
+                    <input 
+                        type="tel" 
+                        id="depositPhone" 
+                        placeholder="254123456789 or 0123456789" 
+                        class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    >
+                    <p class="text-xs text-slate-400 mt-1">Kenyan format required (254...)</p>
+                </div>
+
+                <!-- Amount Input -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Amount (Ksh) *</label>
+                    <input 
+                        type="number" 
+                        id="depositAmount" 
+                        placeholder="500" 
+                        min="1"
+                        max="1000000"
+                        class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                    >
+                    <p class="text-xs text-slate-400 mt-1">Positive numbers only • Max: Ksh 1,000,000</p>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="depositLoading" class="hidden mb-4 text-center">
+                <p class="text-blue-400 text-sm flex items-center justify-center gap-2">
+                    <span class="inline-block animate-spin">⏳</span>
+                    Processing STK Push...
+                </p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="depositError" class="hidden mb-4 bg-red-950/30 border border-red-500/50 rounded-lg p-3 text-red-300 text-sm"></div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button 
+                    onclick="closeDepositModal()" 
+                    class="flex-1 bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-semibold transition-all"
+                >
+                    Cancel
+                </button>
+                <button 
+                    onclick="submitDeposit()" 
+                    id="depositSubmitBtn"
+                    class="flex-1 bg-green-600 hover:bg-green-500 active:bg-green-700 py-3 rounded-xl font-semibold transition-all active:scale-95"
+                >
+                    Initiate STK Push
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        const API_BASE = window.location.origin;
+
+        // ============ BALANCE FETCHING ============
         async function fetchBalance() {
+            setStatus("Fetching...");
             try {
-                const res = await fetch('/api/balance');
+                const res = await fetch(`${API_BASE}/api/balance`);
                 const data = await res.json();
-                document.getElementById('balance').innerText = `Ksh ${data.balance || 0}`;
+                
+                // Format and display balance
+                const balance = data.balance || 0;
+                const formatted = new Intl.NumberFormat('en-KE', {
+                    style: 'currency',
+                    currency: 'KES',
+                    minimumFractionDigits: 0
+                }).format(balance);
+                
+                document.getElementById('balance').innerText = formatted;
+                document.getElementById('vibe-text').innerText = data.vibe_check || "The vault awaits...";
+                document.getElementById('transaction-count').innerText = 
+                    `${data.count || 0} transaction${data.count !== 1 ? 's' : ''} recorded`;
+                
+                setStatus("✓ Updated");
             } catch (e) {
                 document.getElementById('balance').innerText = "Error ⚠️";
+                document.getElementById('vibe-text').innerText = "Connection lost to vault 🔌";
+                setStatus("✗ Failed to fetch");
             }
         }
-        window.onload = fetchBalance;
+
+        // ============ DEPOSIT FLOW ============
+        function openDepositModal() {
+            document.getElementById('depositModal').classList.remove('hidden');
+            document.getElementById('depositPhone').focus();
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').classList.add('hidden');
+            clearDepositForm();
+        }
+
+        function clearDepositForm() {
+            document.getElementById('depositPhone').value = '';
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('depositError').classList.add('hidden');
+            document.getElementById('depositLoading').classList.add('hidden');
+        }
+
+        async function submitDeposit() {
+            const phone = document.getElementById('depositPhone').value.trim();
+            const amountStr = document.getElementById('depositAmount').value.trim();
+            const errorDiv = document.getElementById('depositError');
+            const loadingDiv = document.getElementById('depositLoading');
+            const submitBtn = document.getElementById('depositSubmitBtn');
+
+            // Clear previous errors
+            errorDiv.classList.add('hidden');
+            loadingDiv.classList.add('hidden');
+
+            // Validate input
+            if (!phone || !amountStr) {
+                showDepositError("Phone and amount are required");
+                return;
+            }
+
+            const amount = parseFloat(amountStr);
+            if (isNaN(amount) || amount <= 0) {
+                showDepositError("Amount must be a positive number");
+                return;
+            }
+
+            // Show loading
+            loadingDiv.classList.remove('hidden');
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/initiate-stk-push`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, amount })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.detail || data.message || "Unknown error");
+                }
+
+                // Success!
+                loadingDiv.classList.add('hidden');
+                alert(`✓ STK Push sent!\n\nPhone: ${data.message}\nAmount: Ksh ${amount.toLocaleString()}`);
+                closeDepositModal();
+                
+                // Refresh balance after a short delay
+                setTimeout(fetchBalance, 2000);
+
+            } catch (e) {
+                showDepositError(e.message);
+            } finally {
+                submitBtn.disabled = false;
+                loadingDiv.classList.add('hidden');
+            }
+        }
+
+        function showDepositError(msg) {
+            const errorDiv = document.getElementById('depositError');
+            errorDiv.innerText = msg;
+            errorDiv.classList.remove('hidden');
+        }
+
+        // ============ UTILITIES ============
+        function setStatus(msg) {
+            document.getElementById('status').innerText = msg;
+        }
+
+        // ============ INIT ============
+        window.addEventListener('load', () => {
+            fetchBalance();
+            setInterval(fetchBalance, 30000); // Refresh every 30s
+        });
+
+        // Close modal on outside click
+        document.getElementById('depositModal').addEventListener('click', (e) => {
+            if (e.target.id === 'depositModal') closeDepositModal();
+        });
     </script>
+
+    <style>
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.2s ease-out; }
+        .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
 </body>
 </html>
