@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChamaSmart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-6">
+    <div class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-2xl text-center border border-slate-700">
+        <h1 class="text-xl font-bold text-blue-400 mb-6 uppercase tracking-tighter">ChamaSmart Vault</h1>
+        <div class="py-8 bg-slate-900 rounded-2xl mb-6">
+            <p class="text-slate-400 text-xs uppercase mb-1">Total Balance</p>
+            <div id="balance" class="text-4xl font-black tracking-tight text-white">Ksh --</div>
+        </div>
+        <button onclick="fetchBalance()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all active:scale-95">
+            Refresh Balance 🔄
+        </button>
+    </div>
+    <script>
+        async function fetchBalance() {
+            try {
+                const res = await fetch('/api/balance');
+                const data = await res.json();
+                document.getElementById('balance').innerText = `Ksh ${data.balance || 0}`;
+            } catch (e) {
+                document.getElementById('balance').innerText = "Error ⚠️";
+            }
+        }
+        window.onload = fetchBalance;
+    </script>
+</body>
+</html>
