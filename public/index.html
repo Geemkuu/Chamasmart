@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChamaSmart Vault</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
-        <h1 class="text-2xl font-bold text-green-600">🛡️ ChamaSmart</h1>
-        <p class="text-gray-500">Your current group balance:</p>
-        <div id="balance" class="text-4xl font-black mt-2">Ksh 0.00</div>
-        <p id="vibe" class="mt-4 italic text-sm text-blue-500"></p>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+    <div class="p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-md text-center">
+        <h1 class="text-2xl font-bold mb-2">🛡️ ChamaSmart Vault</h1>
+        <p class="text-slate-400 mb-6 text-sm">Testing Phase: 2-Week Small Money Beta</p>
+        
+        <div class="bg-slate-900 p-6 rounded-xl border border-blue-500/30 mb-6">
+            <span class="text-slate-400 uppercase text-xs tracking-widest">Total Balance</span>
+            <div id="balance" class="text-5xl font-black text-blue-400 mt-2">Ksh --</div>
+        </div>
+
+        <p id="vibe" class="text-sm italic text-slate-300">"T.E.S.S. is waking up..."</p>
+
+        <button onclick="updateBalance()" class="mt-8 bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold transition-all">
+            Refresh Vault 🔄
+        </button>
     </div>
 
     <script>
-        // This tiny script fetches the data instantly
-        fetch('/api/balance')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('balance').innerText = `Ksh ${data.balance}`;
-                document.getElementById('vibe').innerText = data.vibe;
-            });
+        async function updateBalance() {
+            const res = await fetch('/api/balance');
+            const data = await res.json();
+            document.getElementById('balance').innerText = `Ksh ${data.balance}`;
+            document.getElementById('vibe').innerText = `"${data.vibe}"`;
+        }
+        // Load on start
+        updateBalance();
     </script>
 </body>
 </html>
