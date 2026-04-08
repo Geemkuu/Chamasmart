@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-8">
+        <h1 class="text-2xl font-bold text-green-600">🛡️ ChamaSmart</h1>
+        <p class="text-gray-500">Your current group balance:</p>
+        <div id="balance" class="text-4xl font-black mt-2">Ksh 0.00</div>
+        <p id="vibe" class="mt-4 italic text-sm text-blue-500"></p>
+    </div>
+
+    <script>
+        // This tiny script fetches the data instantly
+        fetch('/api/balance')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('balance').innerText = `Ksh ${data.balance}`;
+                document.getElementById('vibe').innerText = data.vibe;
+            });
+    </script>
+</body>
+</html>
